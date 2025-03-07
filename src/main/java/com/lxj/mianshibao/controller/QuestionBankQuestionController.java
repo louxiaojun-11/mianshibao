@@ -10,7 +10,6 @@ import com.lxj.mianshibao.constant.UserConstant;
 import com.lxj.mianshibao.exception.BusinessException;
 import com.lxj.mianshibao.exception.ThrowUtils;
 import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionAddRequest;
-import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionEditRequest;
 import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
 import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionUpdateRequest;
 import com.lxj.mianshibao.model.entity.QuestionBankQuestion;
