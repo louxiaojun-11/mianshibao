@@ -21,7 +21,9 @@ import com.lxj.mianshibao.model.dto.user.UserUpdateRequest;
 import com.lxj.mianshibao.model.entity.User;
 import com.lxj.mianshibao.service.UserService;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -316,5 +318,27 @@ public class UserController {
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 添加用户签到记录
+     * @param request
+     * @param request
+     * @return
+     */
+    @PostMapping("/add/sign_in")
+    public BaseResponse<Boolean> addUserSignIn(HttpServletRequest request) {
+        //必须要登录才能签到
+        User loginUser = userService.getLoginUser(request);
+        boolean result = userService.addUserSignIn(loginUser.getId());
+        return ResultUtils.success(result);
+    }
+
+    @GetMapping("get/sign_in")
+    public BaseResponse <List<Integer>> getUserSignInRecord(Integer year,HttpServletRequest request) {
+        //必须要登录才可以获取数据
+        User loginUser = userService.getLoginUser(request);
+        List<Integer> userSignInRecord = userService.getUserSignInRecord(loginUser.getId(),year);
+        return ResultUtils.success(userSignInRecord);
     }
 }
