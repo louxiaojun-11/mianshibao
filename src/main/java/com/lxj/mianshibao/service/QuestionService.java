@@ -9,6 +9,7 @@ import com.lxj.mianshibao.model.entity.Question;
 import com.lxj.mianshibao.model.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题目服务
@@ -65,4 +66,11 @@ public interface QuestionService extends IService<Question> {
      *
      */
     Page<Question> searchFromEs(QuestionQueryRequest questionQueryRequest);
+
+    /**
+     * 批量删除题目
+     */
+    void batchDeleteQuestion(List<Long> questionIdList);
+
+
 }

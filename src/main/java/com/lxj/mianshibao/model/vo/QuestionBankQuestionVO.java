@@ -24,12 +24,12 @@ public class QuestionBankQuestionVO implements Serializable {
     /**
      * 题库id
      */
-    private String questionBankId;
+    private Long questionBankId;
 
     /**
      * 题目id
      */
-    private String questionId;
+    private Long questionId;
 
     /**
      * 创建用户 id

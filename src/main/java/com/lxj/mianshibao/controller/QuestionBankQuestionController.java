@@ -1,5 +1,6 @@
 package com.lxj.mianshibao.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -11,10 +12,7 @@ import com.lxj.mianshibao.common.ResultUtils;
 import com.lxj.mianshibao.constant.UserConstant;
 import com.lxj.mianshibao.exception.BusinessException;
 import com.lxj.mianshibao.exception.ThrowUtils;
-import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionAddRequest;
-import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
-import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionRemoveRequest;
-import com.lxj.mianshibao.model.dto.questionBankQuestion.QuestionBankQuestionUpdateRequest;
+import com.lxj.mianshibao.model.dto.questionBankQuestion.*;
 import com.lxj.mianshibao.model.entity.QuestionBankQuestion;
 import com.lxj.mianshibao.model.entity.User;
 import com.lxj.mianshibao.model.vo.QuestionBankQuestionVO;
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 题库题目关联接口
@@ -168,8 +167,7 @@ public class QuestionBankQuestionController {
      * @return
      */
     @PostMapping("/list/page/vo")
-    public BaseResponse<Page<QuestionBankQuestionVO>> listQuestionBankQuestionVOByPage(@RequestBody QuestionBankQuestionQueryRequest questionBankQuestionQueryRequest,
-                                                               HttpServletRequest request) {
+    public BaseResponse<Page<QuestionBankQuestionVO>> listQuestionBankQuestionVOByPage(@RequestBody QuestionBankQuestionQueryRequest questionBankQuestionQueryRequest, HttpServletRequest request) {
         long current = questionBankQuestionQueryRequest.getCurrent();
         long size = questionBankQuestionQueryRequest.getPageSize();
         // 限制爬虫
@@ -190,7 +188,7 @@ public class QuestionBankQuestionController {
      */
     @PostMapping("/my/list/page/vo")
     public BaseResponse<Page<QuestionBankQuestionVO>> listMyQuestionBankQuestionVOByPage(@RequestBody QuestionBankQuestionQueryRequest questionBankQuestionQueryRequest,
-                                                                 HttpServletRequest request) {
+                                                                                         HttpServletRequest request) {
         ThrowUtils.throwIf(questionBankQuestionQueryRequest == null, ErrorCode.PARAMS_ERROR);
         // 补充查询条件，只查询当前登录用户的数据
         User loginUser = userService.getLoginUser(request);
@@ -214,9 +212,8 @@ public class QuestionBankQuestionController {
      * @return
      */
     @PostMapping("/remove")
-    public BaseResponse<Boolean> removeQuestionBankQuestion(@RequestBody QuestionBankQuestionRemoveRequest questionBankQuestionRemoveRequest)
-    {
-      ThrowUtils.throwIf(questionBankQuestionRemoveRequest == null,ErrorCode.PARAMS_ERROR);
+    public BaseResponse<Boolean> removeQuestionBankQuestion(@RequestBody QuestionBankQuestionRemoveRequest questionBankQuestionRemoveRequest) {
+        ThrowUtils.throwIf(questionBankQuestionRemoveRequest == null, ErrorCode.PARAMS_ERROR);
         Long questionId = questionBankQuestionRemoveRequest.getQuestionId();
         Long questionBankId = questionBankQuestionRemoveRequest.getQuestionBankId();
 
@@ -227,5 +224,39 @@ public class QuestionBankQuestionController {
         return ResultUtils.success(result);
     }
 
+    /**
+     * 批量添加题目到题库(仅管理员)
+     *
+     * @param questionBankQuestionBatchAddRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/add/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> batchAddQuestionToBank(
+            @RequestBody QuestionBankQuestionBatchAddRequest questionBankQuestionBatchAddRequest, HttpServletRequest request)
+    {
+        ThrowUtils.throwIf(questionBankQuestionBatchAddRequest == null,ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(request);
+        Long questionBankId = questionBankQuestionBatchAddRequest.getQuestionBankId();
+        List<Long> questionIdList = questionBankQuestionBatchAddRequest.getQuestionIdList();
+        questionBankQuestionService.batchAddQuestionToBank(questionIdList,questionBankId,loginUser);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 批量从题库移除题目(仅管理员)
+     */
+    @PostMapping("/remove/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> batchRemoveQuestionToBank(
+            @RequestBody QuestionBankQuestionBatchRemoveRequest questionBankQuestionBatchRemoveRequest, HttpServletRequest request)
+    {
+        ThrowUtils.throwIf(questionBankQuestionBatchRemoveRequest == null,ErrorCode.PARAMS_ERROR);
+        Long questionBankId = questionBankQuestionBatchRemoveRequest.getQuestionBankId();
+        List<Long> questionIdList = questionBankQuestionBatchRemoveRequest.getQuestionIdList();
+        questionBankQuestionService.batchRemoveQuestionFromBank(questionIdList,questionBankId);
+        return ResultUtils.success(true);
+    }
     // endregion
 }
